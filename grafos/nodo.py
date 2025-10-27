@@ -7,3 +7,10 @@ class Node:
 
     def add_neighbor(self, neighbor: Node, weight:int) -> None:
         self.neighbors[neighbor.id] = weight 
+
+    def __str__(self) -> str:
+        string = f"Node({self.id}): "
+        for i in self.neighbors.keys():
+            string += f"Node({i}); "
+        return string
+        
