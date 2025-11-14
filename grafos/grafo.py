@@ -61,6 +61,38 @@ class Graph:
 
         return distances[node2_id], route
 
+    def floydWarshall(self, node1_id, node2_id):
+        nodes = list(self.nodes.keys())
+        n = len(nodes)
+
+        distances = {i: dict.fromkeys(nodes, float('inf')) for i in nodes}
+        next_node = {i: dict.fromkeys(nodes, None) for i in nodes}
+
+        for i in nodes:
+            distances[i][i] = 0
+
+        for i in nodes:
+            for neighbor, weight in self.nodes[i].neighbors.items():
+                distances[i][neighbor] = weight
+                next_node[i][neighbor] = neighbor
+        for i in nodes:
+            for j in nodes:
+                for k in nodes:
+                    if distances[j][i] + distances[i][k] < distances[j][k]:
+                        distances[j][k] = distances[j][i] + distances[i][k]
+                        next_node[j][k] = next_node[j][i]
+        
+        if next_node[node1_id][node2_id] is None:
+            return float('inf'), None
+        route = [node1_id]
+        current = node1_id
+
+        while current != node2_id:
+            current = next_node[current][node2_id]
+            route.append(current)
+
+        return distances[node1_id][node2_id], route
+
     def __str__(self) -> str:
         string = ""
         for i in self.nodes.values():
