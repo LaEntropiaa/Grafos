@@ -58,4 +58,27 @@ def test_dijkstra_3():
 
     distancia, route = grafo.dijkstra("0", "1")
     assert distancia == 3
-    assert route == ["0", "1"]    
+    assert route == ["0", "1"]
+
+def test_dijkstra_4():
+    grafo = Graph(directed=True)
+
+    grafo.add_node("0");
+    grafo.add_node("1");
+    grafo.add_node("2");
+    grafo.add_node("3");
+    grafo.add_node("4");
+
+ 
+    grafo.connect_nodes("0", "1", 3);
+    grafo.connect_nodes("0", "3", 7);
+    grafo.connect_nodes("0", "4", 8);
+    grafo.connect_nodes("4", "3", 3);
+    grafo.connect_nodes("1", "3", 4);
+
+    distance, route = grafo.dijkstra("0", "2")
+    assert distance == float('inf')
+    assert route == ["2"]
+
+
+
