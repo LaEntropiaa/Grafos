@@ -15,8 +15,13 @@ class Graph:
         new_graph = Graph()
         for i in range(n):
             new_graph.add_node(str(i))
-        for n in new_graph.nodes.keys():
-            for m in new_graph.nodes.keys():
+        nodes = list(new_graph.nodes.keys())
+        for i in range(1, len(nodes)):
+            a = nodes[i]
+            b = nodes[random.randint(0, i -1)]
+            new_graph.connect_nodes(a, b, random.randint(minw, maxw))
+        for n in nodes:
+            for m in nodes:
                 if n == m:
                     continue
                 if random.randint(1, 100) < p:
