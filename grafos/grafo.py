@@ -1,12 +1,27 @@
+from __future__ import annotations
 from types import new_class
 from .nodo import Node
 import heapq
+import random
 
 class Graph:
     def __init__(self, directed=False) -> None:
         self.nodes = {}
         self.directed = directed
         self.negative = False
+
+    @staticmethod
+    def random_graph(n: int, p: float, minw:int, maxw:int) -> Graph:
+        new_graph = Graph()
+        for i in range(n):
+            new_graph.add_node(str(i))
+        for n in new_graph.nodes.keys():
+            for m in new_graph.nodes.keys():
+                if n == m:
+                    continue
+                if random.randint(1, 100) < p:
+                    new_graph.connect_nodes(n, m, random.randint(minw, maxw))
+        return new_graph
 
     def add_node(self, id:str):
         if id not in self.nodes:
