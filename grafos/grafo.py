@@ -118,6 +118,15 @@ class Graph:
 
         return distances[node1_id][node2_id], route
 
+    def edge_count(self):
+        total = sum(len(node.neighbors) for node in self.nodes.values())
+        return total // 2 if not self.directed else total
+
+    def density(self):
+        n = len(self.nodes)
+        m = self.edge_count()
+        return (2 * m) / (n * (n - 1)) if n > 1 else 0
+
     def __str__(self) -> str:
         string = ""
         for i in self.nodes.values():
@@ -127,13 +136,16 @@ class Graph:
 def benchmark(n:int, nodes:int, minw:int, maxw:int, p:float, out:str): 
     with open(out, "w", newline="") as f:
         writer = csv.writer(f)
-        writer.writerow(["exp", "source", "target", "t_dijkstra", "t_floyd"])
+        writer.writerow(["exp", "source", "target", "edges", "density", "t_dijkstra", "t_floyd"])
 
         for i in range(n):
             g = Graph.random_graph(nodes, p, minw, maxw)
 
             src = str(random.randint(0, nodes - 1))
             dst = str(random.randint(0, nodes - 1))
+
+            edges = g.edge_count()
+            density = g.density()
 
             t0 = time.perf_counter()
             g.dijkstra(src, dst, True)  
@@ -145,4 +157,4 @@ def benchmark(n:int, nodes:int, minw:int, maxw:int, p:float, out:str):
             t1 = time.perf_counter()
             t_floyd = t1 - t0
             
-            writer.writerow([i, src, dst, t_dijkstra, t_floyd])
+            writer.writerow([i, src, dst, edges, density, t_dijkstra, t_floyd])
