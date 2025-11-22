@@ -1,8 +1,6 @@
 from grafos import *
+from grafos.grafo import benchmark
 
-grafo = Graph.random_graph(20, 10, 1, 10);
+benchmark(10000, 50, 1, 10, 5, "result.csv")
 
-distance, route = grafo.floydWarshall("0", "6")
-print(distance)
-print(route)
 
