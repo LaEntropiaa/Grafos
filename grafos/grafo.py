@@ -1,12 +1,34 @@
+from __future__ import annotations
 from types import new_class
 from .nodo import Node
 import heapq
+import random
+import time
+import csv
 
 class Graph:
     def __init__(self, directed=False) -> None:
         self.nodes = {}
         self.directed = directed
         self.negative = False
+
+    @staticmethod
+    def random_graph(n: int, p: float, minw:int, maxw:int) -> Graph:
+        new_graph = Graph()
+        for i in range(n):
+            new_graph.add_node(str(i))
+        nodes = list(new_graph.nodes.keys())
+        for i in range(1, len(nodes)):
+            a = nodes[i]
+            b = nodes[random.randint(0, i -1)]
+            new_graph.connect_nodes(a, b, random.randint(minw, maxw))
+        for n in nodes:
+            for m in nodes:
+                if n == m:
+                    continue
+                if random.randint(1, 100) < p:
+                    new_graph.connect_nodes(n, m, random.randint(minw, maxw))
+        return new_graph
 
     def add_node(self, id:str):
         if id not in self.nodes:
@@ -30,7 +52,7 @@ class Graph:
         if not self.directed:
             self.nodes[node2_id].add_neighbor(self.nodes[node1_id], weight)
 
-    def dijkstra(self, node1_id:str, node2_id:str) :
+    def dijkstra(self, node1_id:str, node2_id:str, fast:bool = False) :
         distances = {n: float('inf') for n in self.nodes};
         distances[node1_id] = 0;
 
@@ -51,7 +73,8 @@ class Graph:
                     distances[neighbour_id] = new_distance
                     previous[neighbour_id] = current_node_id
                     heapq.heappush(heap, (new_distance, neighbour_id))
-
+        if fast == True:
+            return distances[node2_id]
         route = []
         n = node2_id
         while n is not None:
@@ -61,7 +84,7 @@ class Graph:
 
         return distances[node2_id], route
 
-    def floydWarshall(self, node1_id, node2_id):
+    def floydWarshall(self, node1_id, node2_id, fast:bool = False):
         nodes = list(self.nodes.keys())
         n = len(nodes)
 
@@ -81,7 +104,9 @@ class Graph:
                     if distances[j][i] + distances[i][k] < distances[j][k]:
                         distances[j][k] = distances[j][i] + distances[i][k]
                         next_node[j][k] = next_node[j][i]
-        
+        if fast == True:
+            return distances[node1_id][node2_id]
+
         if next_node[node1_id][node2_id] is None:
             return float('inf'), None
         route = [node1_id]
@@ -93,9 +118,43 @@ class Graph:
 
         return distances[node1_id][node2_id], route
 
+    def edge_count(self):
+        total = sum(len(node.neighbors) for node in self.nodes.values())
+        return total // 2 if not self.directed else total
+
+    def density(self):
+        n = len(self.nodes)
+        m = self.edge_count()
+        return (2 * m) / (n * (n - 1)) if n > 1 else 0
+
     def __str__(self) -> str:
         string = ""
         for i in self.nodes.values():
             string += f"{i}\n"
         return string
 
+def benchmark(n:int, nodes:int, minw:int, maxw:int, p:float, out:str): 
+    with open(out, "w", newline="") as f:
+        writer = csv.writer(f)
+        writer.writerow(["exp", "source", "target", "edges", "density", "t_dijkstra", "t_floyd"])
+
+        for i in range(n):
+            g = Graph.random_graph(nodes, p, minw, maxw)
+
+            src = str(random.randint(0, nodes - 1))
+            dst = str(random.randint(0, nodes - 1))
+
+            edges = g.edge_count()
+            density = g.density()
+
+            t0 = time.perf_counter()
+            g.dijkstra(src, dst, True)  
+            t1 = time.perf_counter()
+            t_dijkstra = t1 - t0
+
+            t0 = time.perf_counter()
+            g.floydWarshall(src, dst, True)
+            t1 = time.perf_counter()
+            t_floyd = t1 - t0
+            
+            writer.writerow([i, src, dst, edges, density, t_dijkstra, t_floyd])

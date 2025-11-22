@@ -141,7 +141,7 @@ def test_dijkstra_7():
     assert route == ["0", "1"]
 
 
-def test_dijkstra_4():
+def test_dijkstra_8():
     grafo = Graph(directed=True)
 
     grafo.add_node("0");
